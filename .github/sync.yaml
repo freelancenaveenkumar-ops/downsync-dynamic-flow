@@ -1,9 +1,11 @@
-name: Dynamic Branch Sync
+name: Dynamic Branch Sync on PR Merge
 
 on:
-  push:
+  pull_request:
+    types:
+      - closed   # fires when PR is closed (merged or not)
     branches:
-      - '**'   # listen to all branches
+      - '**'     # listen to all branches
 
 jobs:
   sync:
