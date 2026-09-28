@@ -5,7 +5,10 @@ on:
     types:
       - closed   # fires when PR is closed (merged or not)
     branches:
-      - '**'     # listen to all branches
+      - 'pbna/5.1'
+      - 'pbna/5.2'
+      - 'pog/5.1'
+      - 'pog/5.2' # listen to all branches
 
 jobs:
   sync:
@@ -26,7 +29,7 @@ jobs:
           echo "flow=$FLOW" >> $GITHUB_OUTPUT
 
       - name: Trigger PRs
-        if: steps.branch_flow.outputs.flow != ""
+        if: ${{ steps.branch_flow.outputs.flow != '' }}
         run: |
           SRC="${GITHUB_REF##*/}"
           IFS=',' read -ra TARGETS <<< "${{ steps.branch_flow.outputs.flow }}"
