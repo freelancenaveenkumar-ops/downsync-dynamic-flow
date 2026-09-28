@@ -19,7 +19,7 @@ jobs:
           BRANCH="${GITHUB_REF##*/}"
           echo "Source branch: $BRANCH"
 
-          FLOW=$(jq -r --arg b "$BRANCH" '.[$b] | @csv' .github/branch-flow.json)
+          FLOW=$(jq -r --arg b "$BRANCH" '.[$b] | @csv' .github/sync-flow.json)
           echo "Flow: $FLOW"
           echo "flow=$FLOW" >> $GITHUB_OUTPUT
 
@@ -31,9 +31,6 @@ jobs:
 
           for DEST in "${TARGETS[@]}"; do
             echo "Creating PR: $SRC → $DEST"
-            #gh pr create --base "$DEST" --head "$SRC" \
-            #  --title "Auto-sync: $SRC → $DEST" \
-            #  --body "Triggered by dynamic branch flow"
           done
         #env:
           #GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
