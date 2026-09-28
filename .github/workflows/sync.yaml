@@ -21,12 +21,13 @@ jobs:
       - name: Read branch flow
         id: branch_flow
         run: |
-          BRANCH="${GITHUB_REF##*/}"
-          echo "Source branch: $BRANCH"
+          SRC="${{ github.event.pull_request.base.ref }}"
+          echo "Merged into: $SRC"
 
-          FLOW=$(jq -r --arg b "$BRANCH" '.[$b] | @csv' .github/sync-flow.json)
-          echo "Flow: $FLOW"
-          echo "flow=$FLOW" >> $GITHUB_OUTPUT
+          FLOW=$(jq -r --arg b "$SRC" '.[$b] | join(",")' .github/sync-flow.json)
+          if [ "$FLOW" != "null" ]; then
+            echo "flow=$FLOW" >> $GITHUB_OUTPUT
+          fi
 
       - name: Trigger PRs
         if: ${{ steps.branch_flow.outputs.flow != '' }}
