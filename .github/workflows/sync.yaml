@@ -1,22 +1,22 @@
-name: Dynamic Branch Sync on PR Merge
+name: Dynamic Cascading Branch Sync
 
 on:
   pull_request:
-    types:
-      - closed   # fires when PR is closed (merged or not)
+    types: [closed]
     branches:
-      - 'pbna/5.1'
-      - 'pbna/5.2'
-      - 'pog/5.1'
-      - 'pog/5.2' # listen to all branches
+      - '**'   # listen to all branches
 
 jobs:
   sync:
+    if: github.event.pull_request.merged == true
     runs-on: ubuntu-latest
 
     steps:
       - name: Checkout repository
         uses: actions/checkout@v3
+
+      - name: Install jq
+        run: sudo apt-get install -y jq
 
       - name: Read branch flow
         id: branch_flow
@@ -30,13 +30,11 @@ jobs:
           fi
 
       - name: Trigger PRs
-        if: ${{ steps.branch_flow.outputs.flow != '' }}
+        if: ${{ steps.branch_flow.outputs.flow }}
         run: |
-          SRC="${GITHUB_REF##*/}"
+          SRC="${{ github.event.pull_request.base.ref }}"
           IFS=',' read -ra TARGETS <<< "${{ steps.branch_flow.outputs.flow }}"
 
           for DEST in "${TARGETS[@]}"; do
             echo "Creating PR: $SRC → $DEST"
           done
-        #env:
-          #GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
