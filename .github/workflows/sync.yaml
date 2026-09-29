@@ -39,7 +39,7 @@ jobs:
 
           for DEST in "${TARGETS[@]}"; do
             echo "Checking PR: $SRC → $DEST"
-            # EXISTING=$(gh pr list --base "$DEST" --head "$SRC" --json number --jq '.[0].number')
+            EXISTING=0 #$(gh pr list --base "$DEST" --head "$SRC" --json number --jq '.[0].number')
 
             if [ -n "$EXISTING" ]; then
               echo "PR already exists (#$EXISTING), refreshing..."
