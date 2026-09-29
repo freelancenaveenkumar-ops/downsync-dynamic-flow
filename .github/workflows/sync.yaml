@@ -1,0 +1,56 @@
+name: Dynamic Parallel + Cascade Sync
+
+on:
+  pull_request:
+    types: [closed]
+    branches:
+      - 'pbna/**'
+      - 'pog/**'
+      - 'combined/**'
+
+jobs:
+  sync:
+    if: github.event.pull_request.merged == true
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Install jq
+        run: sudo apt-get install -y jq
+
+      - name: Read branch flow
+        id: branch_flow
+        run: |
+          SRC="${{ github.event.pull_request.base.ref }}"
+          echo "Merged into: $SRC"
+
+          TARGETS=$(jq -r --arg b "$SRC" '.[$b] | join(",")' .github/sync-flow.json)
+          if [ "$TARGETS" != "null" ]; then
+            echo "targets=$TARGETS" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Trigger PRs
+        if: ${{ steps.branch_flow.outputs.targets }}
+        run: |
+          SRC="${{ github.event.pull_request.base.ref }}"
+          IFS=',' read -ra TARGETS <<< "${{ steps.branch_flow.outputs.targets }}"
+
+          for DEST in "${TARGETS[@]}"; do
+            echo "Checking PR: $SRC → $DEST"
+            EXISTING=0 #$(gh pr list --base "$DEST" --head "$SRC" --json number --jq '.[0].number')
+
+            if [ -n "$EXISTING" ]; then
+              echo "PR already exists (#$EXISTING), refreshing..."
+              # gh pr edit "$EXISTING" --title "Auto-sync: $SRC → $DEST" --body "Refreshed by workflow"
+            else
+              echo "Creating new PR: $SRC → $DEST"
+              # gh pr create --base "$DEST" --head "$SRC" \
+              #   --title "Auto-sync: $SRC → $DEST" \
+              #   --body "Triggered by PR merge into $SRC"
+            fi
+          done
+        # env:
+        #   GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
