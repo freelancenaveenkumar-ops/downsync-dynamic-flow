@@ -1,10 +1,12 @@
-name: Dynamic Cascading Branch Sync
+name: Dynamic Parallel + Cascade Sync
 
 on:
   pull_request:
     types: [closed]
     branches:
-      - '**'   # listen to all branches
+      - 'pbna/**'
+      - 'pog/**'
+      - 'combined/**'
 
 jobs:
   sync:
@@ -24,16 +26,16 @@ jobs:
           SRC="${{ github.event.pull_request.base.ref }}"
           echo "Merged into: $SRC"
 
-          FLOW=$(jq -r --arg b "$SRC" '.[$b] | join(",")' .github/sync-flow.json)
-          if [ "$FLOW" != "null" ]; then
-            echo "flow=$FLOW" >> $GITHUB_OUTPUT
+          TARGETS=$(jq -r --arg b "$SRC" '.[$b] | join(",")' .github/sync-flow.json)
+          if [ "$TARGETS" != "null" ]; then
+            echo "targets=$TARGETS" >> $GITHUB_OUTPUT
           fi
 
       - name: Trigger PRs
-        if: ${{ steps.branch_flow.outputs.flow }}
+        if: ${{ steps.branch_flow.outputs.targets }}
         run: |
           SRC="${{ github.event.pull_request.base.ref }}"
-          IFS=',' read -ra TARGETS <<< "${{ steps.branch_flow.outputs.flow }}"
+          IFS=',' read -ra TARGETS <<< "${{ steps.branch_flow.outputs.targets }}"
 
           for DEST in "${TARGETS[@]}"; do
             echo "Creating PR: $SRC → $DEST"
