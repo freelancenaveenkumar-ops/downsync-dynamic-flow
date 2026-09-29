@@ -39,18 +39,18 @@ jobs:
 
           for DEST in "${TARGETS[@]}"; do
             echo "Checking PR: $SRC → $DEST"
-            EXISTING=1 #$(gh pr list --base "$DEST" --head "$SRC" --json number --jq '.[0].number')
+            EXISTING=$(gh pr list --base "$DEST" --head "$SRC" --json number --jq '.[0].number')
 
             if [ -n "$EXISTING" ]; then
               echo "PR already exists (#$EXISTING), refreshing..."
-              # gh pr edit "$EXISTING" --title "Auto-sync: $SRC → $DEST" --body "Refreshed by workflow"
+              gh pr edit "$EXISTING" --title "Auto-sync: $SRC → $DEST" --body "Refreshed by workflow"
             else
               echo "Creating new PR: $SRC → $DEST"
-              # gh pr create --base "$DEST" --head "$SRC" \
-              #   --title "Auto-sync: $SRC → $DEST" \
-              #   --body "Triggered by PR merge into $SRC"
+              gh pr create --base "$DEST" --head "$SRC" \
+                 --title "Auto-sync: $SRC → $DEST" \
+                 --body "Triggered by PR merge into $SRC"
             fi
           done
-        # env:
-        #   GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
