@@ -38,19 +38,25 @@ jobs:
           IFS=',' read -ra TARGETS <<< "${{ steps.branch_flow.outputs.targets }}"
 
           for DEST in "${TARGETS[@]}"; do
-            echo "Checking PR: $SRC → $DEST"
-            EXISTING=$(gh pr list --base "$DEST" --head "$SRC" --json number --jq '.[0].number')
+            echo "Checking changes between $SRC → $DEST"
+            git fetch origin "$DEST"
+            DIFF=$(git diff --name-status origin/$DEST..$SRC)
 
-            if [ -n "$EXISTING" ]; then
-              echo "PR already exists (#$EXISTING), refreshing..."
-              gh pr edit "$EXISTING" --title "Auto-sync: $SRC → $DEST" --body "Refreshed by workflow"
+            if [ -n "$DIFF" ]; then
+              echo "Changes detected, raising PR..."
+              EXISTING=$(gh pr list --base "$DEST" --head "$SRC" --json number --jq '.[0].number')
+              if [ -n "$EXISTING" ]; then
+                echo "PR already exists (#$EXISTING), refreshing..."
+                gh pr edit "$EXISTING" --title "Auto-sync: $SRC → $DEST" --body "Refreshed by workflow"
+              else
+                gh pr create --base "$DEST" --head "$SRC" \
+                  --title "Auto-sync: $SRC → $DEST" \
+                  --body "Triggered by PR merge into $SRC"
+              fi
             else
-              echo "Creating new PR: $SRC → $DEST"
-              gh pr create --base "$DEST" --head "$SRC" \
-                 --title "Auto-sync: $SRC → $DEST" \
-                 --body "Triggered by PR merge into $SRC"
+              echo "No changes detected, skipping PR for $SRC → $DEST"
             fi
           done
         env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_TOKEN: ${{ secrets.DYNAMIC_SYNC_TOKEN }}
 
