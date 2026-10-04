@@ -1,12 +1,14 @@
 name: Trigger Sync
 #test
 on:
-  pull_request:
-    types: [closed]
-    branches:
-      - 'pbna/**'
-      - 'pog/**'
-      - 'combined/**'
+  workflow_dispatch: 
+# on:
+#   pull_request:
+#     types: [closed]
+#     branches:
+#       - 'pbna/**'
+#       - 'pog/**'
+#       - 'combined/**'
 
 jobs:
   call-downsync:
