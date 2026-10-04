@@ -1,7 +1,14 @@
 name: Call Reusable Workflow
 
+# on:
+#   workflow_dispatch:
 on:
-  workflow_dispatch:
+  pull_request:
+    types: [closed]
+    branches:
+      - 'pbna/**'
+      - 'pog/**'
+      - 'combined/**'
 
 jobs:
   call-workflow:
