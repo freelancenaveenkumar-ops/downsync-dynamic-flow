@@ -17,5 +17,5 @@ jobs:
     with:
       source_branch: ${{ github.event.pull_request.base.ref }}
 
-    secrets:
-      API_TOKEN: ${{ secrets.DYNAMIC_SYNC_TOKEN }}
+    secrets: inherit
+      #API_TOKEN: ${{ secrets.DYNAMIC_SYNC_TOKEN }}
