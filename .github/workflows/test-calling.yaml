@@ -16,3 +16,4 @@ jobs:
 
     with:
       message: "Hello from calling repository"
+    secrets: inherit
