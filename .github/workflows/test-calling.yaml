@@ -1,6 +1,5 @@
 name: Call Reusable Workflow
 
-# on:
 on:
   pull_request:
     types: [closed]
