@@ -1,23 +1,11 @@
-name: Trigger Sync
-#test
+name: Call Reusable Workflow
+
 on:
-  workflow_dispatch: 
-# on:
-#   pull_request:
-#     types: [closed]
-#     branches:
-#       - 'pbna/**'
-#       - 'pog/**'
-#       - 'combined/**'
+  workflow_dispatch:
 
 jobs:
-  call-downsync:
-    if: github.event.pull_request.merged == true
-
-    uses: freelancenaveenkumar-ops/reusable_github_actions/.github/workflows/downsync.yaml@dynamic_downsync_workflow
+  call-workflow:
+    uses: freelancenaveenkumar-ops/calling_repo/.github/workflows/test-calling.yaml@main
 
     with:
-      source_branch: ${{ github.event.pull_request.base.ref }}
-
-    secrets: inherit
-      #API_TOKEN: ${{ secrets.DYNAMIC_SYNC_TOKEN }}
+      message: "Hello from calling repository"
