@@ -14,4 +14,5 @@ jobs:
     uses: freelancenaveenkumar-ops/reusable_github_actions/.github/workflows/downsync.yaml@dynamic_downsync_workflow
     with:
       source_branch: ${{ github.event.pull_request.base.ref }}
+    secrets: inherit
 
