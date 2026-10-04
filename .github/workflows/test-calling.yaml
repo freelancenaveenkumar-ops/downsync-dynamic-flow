@@ -1,0 +1,11 @@
+name: Call Reusable Workflow
+
+on:
+  workflow_dispatch:
+
+jobs:
+  call-workflow:
+    uses: freelancenaveenkumar-ops/reusable_github_actions/.github/workflows/test-called.yml@main
+
+    with:
+      message: "Hello from calling repository"
