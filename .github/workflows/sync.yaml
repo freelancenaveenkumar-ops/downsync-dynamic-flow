@@ -11,11 +11,11 @@ on:
 jobs:
   call-downsync:
     if: github.event.pull_request.merged == true
+
     uses: freelancenaveenkumar-ops/reusable_github_actions/.github/workflows/downsync.yaml@dynamic_downsync_workflow
+
     with:
       source_branch: ${{ github.event.pull_request.base.ref }}
-    permissions:
-      contents: read
-      id-token: write
-    secrets: inherit
 
+    secrets:
+      API_TOKEN: ${{ secrets.DYNAMIC_SYNC_TOKEN }}
