@@ -7,11 +7,9 @@ on:
       - 'pbna/**'
       - 'pog/**'
       - 'combined/**'
+#test
 
 jobs:
   call-workflow:
     uses: freelancenaveenkumar-ops/calling_repo/.github/workflows/sync-calling.yaml@sync
-
-    with:
-      message: "Hello from calling repository"
     secrets: inherit
