@@ -1,0 +1,9 @@
+{
+  "pbna/5.1": ["pog/5.1", "pbna/5.2"],
+  "pog/5.1": ["combined/5.1", "pog/5.2"],
+  "combined/5.1": ["combined/5.2"],
+
+  "pbna/5.2": ["pog/5.2", "pbna/6.0"],
+  "pog/5.2": ["combined/5.2", "pog/6.0"],
+  "combined/5.2": ["combined/6.0"]
+}
