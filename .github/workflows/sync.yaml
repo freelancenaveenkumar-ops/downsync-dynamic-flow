@@ -1,4 +1,4 @@
-name: Dynamic Parallel + Cascade Sync
+name: Call Reusable Workflow
 
 on:
   pull_request:
@@ -7,56 +7,8 @@ on:
       - 'pbna/**'
       - 'pog/**'
       - 'combined/**'
-
+#test 1
 jobs:
-  sync:
-    if: github.event.pull_request.merged == true
-    runs-on: ubuntu-latest
-
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v3
-
-      - name: Install jq
-        run: sudo apt-get install -y jq
-
-      - name: Read branch flow
-        id: branch_flow
-        run: |
-          SRC="${{ github.event.pull_request.base.ref }}"
-          echo "Merged into: $SRC"
-
-          TARGETS=$(jq -r --arg b "$SRC" '.[$b] | join(",")' .github/sync-flow.json)
-          if [ "$TARGETS" != "null" ]; then
-            echo "targets=$TARGETS" >> $GITHUB_OUTPUT
-          fi
-
-      - name: Trigger PRs
-        if: ${{ steps.branch_flow.outputs.targets }}
-        run: |
-          SRC="${{ github.event.pull_request.base.ref }}"
-          IFS=',' read -ra TARGETS <<< "${{ steps.branch_flow.outputs.targets }}"
-
-          for DEST in "${TARGETS[@]}"; do
-            echo "Checking changes between $SRC → $DEST"
-            git fetch origin "$DEST"
-            DIFF=$(git diff --name-status origin/$DEST..$SRC)
-
-            if [ -n "$DIFF" ]; then
-              echo "Changes detected, raising PR..."
-              EXISTING=$(gh pr list --base "$DEST" --head "$SRC" --json number --jq '.[0].number')
-              if [ -n "$EXISTING" ]; then
-                echo "PR already exists (#$EXISTING), refreshing..."
-                gh pr edit "$EXISTING" --title "Auto-sync: $SRC → $DEST" --body "Refreshed by workflow"
-              else
-                gh pr create --base "$DEST" --head "$SRC" \
-                  --title "Auto-sync: $SRC → $DEST" \
-                  --body "Triggered by PR merge into $SRC"
-              fi
-            else
-              echo "No changes detected, skipping PR for $SRC → $DEST"
-            fi
-          done
-        env:
-          GH_TOKEN: ${{ secrets.DYNAMIC_SYNC_TOKEN }}
-
+  call-workflow:
+    uses: freelancenaveenkumar-ops/calling_repo/.github/workflows/sync-calling.yaml@sync
+    secrets: inherit
